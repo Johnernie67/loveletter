@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Click for fireworks · reveal "It's you!" + image</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(145deg, #0f172a, #1e293b, #0f172a);
+      background-size: 400% 400%;
+      animation: galaxyFlow 14s ease infinite alternate;
+      font-family: 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      padding: 16px;
+    }
+
+    @keyframes galaxyFlow {
+      0% { background-position: 0% 0%; background-color: #0b1120; }
+      50% { background-position: 100% 100%; background-color: #1a2639; }
+      100% { background-position: 0% 0%; background-color: #0f172a; }
+    }
+
+    .card {
+      position: relative;
+      width: 100%;
+      max-width: 750px;
+      height: 500px;
+      background: rgba(10, 20, 40, 0.4);
+      backdrop-filter: blur(10px);
+      border-radius: 64px;
+      border: 1px solid rgba(255, 215, 0, 0.2);
+      box-shadow: 0 30px 50px -20px black, 0 0 0 2px #2a3f5e inset;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      transition: box-shadow 0.3s;
+    }
+
+    /* main prank button */
+    .celebrate-btn {
+      padding: 1.4rem 3.8rem;
+      font-size: 2.4rem;
+      font-weight: 800;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      background: linear-gradient(45deg, #fbbf24, #f59e0b, #dc2626);
+      background-size: 200% 200%;
+      border: none;
+      border-radius: 80px;
+      color: #0c0a2a;
+      box-shadow: 0 15px 0 #92400e, 0 25px 30px #00000080, 0 0 25px #fbbf24;
+      cursor: pointer;
+      z-index: 20;
+      transition: all 0.15s;
+      animation: buttonBreathe 2.2s infinite alternate ease-in-out;
+      border: 2px solid #ffdf8c;
+    }
+
+    .celebrate-btn:active {
+      transform: scale(0.96);
+      box-shadow: 0 6px 0 #92400e, 0 20px 25px black;
+    }
+
+    @keyframes buttonBreathe {
+      0% { transform: scale(1) rotate(-0.5deg); background-position: 0% 50%; text-shadow: 0 0 5px gold; }
+      100% { transform: scale(1.06) rotate(0.5deg); background-position: 100% 50%; text-shadow: 0 0 15px orange; }
+    }
+
+    /* instruction badge */
+    .info-badge {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+      background: #00000066;
+      backdrop-filter: blur(12px);
+      padding: 10px 22px;
+      border-radius: 40px;
+      color: #ffe484;
+      font-weight: 500;
+      border: 1px solid #ffbb77;
+      box-shadow: 0 0 15px #ffa50077;
+      z-index: 25;
+      font-size: 1.2rem;
+      letter-spacing: 1px;
+      pointer-events: none;
+      animation: badgeGlow 2s infinite alternate;
+    }
+
+    @keyframes badgeGlow {
+      from { border-color: #ffb347; box-shadow: 0 0 8px #ffb347; }
+      to { border-color: #ff69b4; box-shadow: 0 0 22px #ff69b4; }
+    }
+
+    /* fireworks canvas */
+    #fireworksCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 30;
+      display: none;
+      border-radius: inherit;
+    }
+
+    /* image + text overlay */
+    .image-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);  /* dim background to pop image */
+      display: none;
+      flex-direction: column;   /* stack vertically */
+      justify-content: center;
+      align-items: center;
+      z-index: 50;
+      border-radius: inherit;
+      backdrop-filter: blur(6px);
+      animation: overlayAppear 0.8s cubic-bezier(0.2, 0.9, 0.3, 1.1);
+    }
+
+    @keyframes overlayAppear {
+      0% { opacity: 0; backdrop-filter: blur(0px); transform: scale(0.9); }
+      100% { opacity: 1; backdrop-filter: blur(6px); transform: scale(1); }
+    }
+
+    /* image styling */
+    .image-overlay img {
+      max-width: 70%;
+      max-height: 60%;
+      border-radius: 40px;
+      box-shadow: 0 0 40px 15px gold, 0 20px 30px black;
+      border: 5px solid white;
+      object-fit: contain;
+      background: #1e1e3f;
+      animation: imgZoom 0.7s ease-out;
+    }
+
+    @keyframes imgZoom {
+      0% { transform: scale(0.2) rotate(-8deg); opacity: 0; }
+      70% { transform: scale(1.05) rotate(1deg); }
+      100% { transform: scale(1) rotate(0); opacity: 1; }
+    }
+
+    /* "It's you!" text with its own fancy animation */
+    .itsyou-text {
+      font-size: 4rem;
+      font-weight: 900;
+      margin-top: 20px;
+      color: #fff0b5;
+      text-shadow: 0 0 20px cyan, 0 0 40px magenta, 4px 4px 0 #2d0a4e;
+      letter-spacing: 6px;
+      background: linear-gradient(45deg, #fcee98, #ffb347, #ff6ec7);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;  /* gradient text */
+      animation: itsyouGlow 1.8s infinite alternate ease-in-out, textWobble 2.2s infinite;
+      display: inline-block;
+      padding: 0 20px;
+      border-radius: 60px;
+      transform-origin: center;
+    }
+
+    @keyframes itsyouGlow {
+      0% { filter: drop-shadow(0 0 5px #ff00c8) drop-shadow(0 0 15px gold); letter-spacing: 4px; }
+      100% { filter: drop-shadow(0 0 20px cyan) drop-shadow(0 0 40px magenta); letter-spacing: 10px; text-shadow: 0 0 30px white; }
+    }
+
+    @keyframes textWobble {
+      0% { transform: rotate(-2deg) scale(1); }
+      25% { transform: rotate(2deg) scale(1.1); }
+      50% { transform: rotate(-1deg) scale(1.05); }
+      75% { transform: rotate(1deg) scale(1.1); }
+      100% { transform: rotate(0deg) scale(1); }
+    }
+
+    /* small note at bottom */
+    .small-note {
+      position: absolute;
+      bottom: 20px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      color: #afc9ff;
+      opacity: 0.8;
+      font-size: 1.2rem;
+      font-style: italic;
+      text-shadow: 0 0 8px cyan;
+      z-index: 15;
+      pointer-events: none;
+    }
+
+    /* animated border effect for card */
+    .card::before {
+      content: '';
+      position: absolute;
+      top: -2px; left: -2px; right: -2px; bottom: -2px;
+      background: linear-gradient(45deg, #ff8800, #ffcc00, #ff0088, #00ccff);
+      background-size: 300% 300%;
+      border-radius: 66px;
+      z-index: -1;
+      animation: borderRotate 8s linear infinite;
+      opacity: 0.3;
+    }
+
+    @keyframes borderRotate {
+      0% { filter: hue-rotate(0deg); background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { filter: hue-rotate(360deg); background-position: 0% 50%; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="card" id="prankCard">
+  <!-- main clickable button -->
+  <button class="celebrate-btn" id="fireButton">🎉 CLICK ME 🎉</button>
+
+  <!-- badges -->
+  <div class="info-badge">✨ 5 sec fireworks → "It's you!" + 1.jpg ✨</div>
+  <div class="small-note">👇 fireworks then surprise 👇</div>
+
+  <!-- fireworks canvas -->
+  <canvas id="fireworksCanvas"></canvas>
+
+  <!-- image overlay with "It's you!" text -->
+  <div class="image-overlay" id="imageOverlay">
+    <img src="1.jpg" alt="1.jpg revealed" id="revealedImg">
+    <div class="itsyou-text">It's you!</div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    const button = document.getElementById('fireButton');
+    const canvas = document.getElementById('fireworksCanvas');
+    const overlay = document.getElementById('imageOverlay');
+    const ctx = canvas.getContext('2d');
+    const card = document.getElementById('prankCard');
+
+    // fit canvas to card
+    function resizeCanvas() {
+      const rect = card.getBoundingClientRect();
+      canvas.width = rect.width;
+      canvas.height = rect.height;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    // ---------- fireworks particles ----------
+    let particles = [];
+    let animationId = null;
+    let fireworksActive = false;
+
+    class Particle {
+      constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.vx = (Math.random() - 0.5) * 8;
+        this.vy = (Math.random() - 0.5) * 8 - 2;
+        this.size = Math.random() * 4 + 2;
+        this.color = `hsl(${Math.random() * 360}, 100%, 70%)`;
+        this.life = 1.0;
+        this.decay = 0.01 + Math.random() * 0.02;
+        this.gravity = 0.1;
+      }
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.vy += this.gravity;
+        this.life -= this.decay;
+        this.size *= 0.99;
+      }
+      draw(ctx) {
+        ctx.globalAlpha = this.life;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+        ctx.shadowColor = 'white';
+        ctx.shadowBlur = 10;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.globalAlpha = 1.0;
+      }
+    }
+
+    function createExplosion(centerX, centerY) {
+      const count = 60 + Math.floor(Math.random() * 50);
+      for (let i = 0; i < count; i++) {
+        particles.push(new Particle(centerX, centerY));
+      }
+    }
+
+    function animateFireworks() {
+      if (!fireworksActive) return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      for (let i = 0; i < 3 + Math.floor(Math.random() * 4); i++) {
+        const randX = Math.random() * canvas.width;
+        const randY = Math.random() * canvas.height * 0.6 + 30;
+        createExplosion(randX, randY);
+      }
+
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.update();
+        if (p.life <= 0.02 || p.y > canvas.height + 20 || p.x < -20 || p.x > canvas.width + 20) {
+          particles.splice(i, 1);
+        } else {
+          p.draw(ctx);
+        }
+      }
+
+      animationId = requestAnimationFrame(animateFireworks);
+    }
+
+    // fallback if image missing
+    const imgElement = document.getElementById('revealedImg');
+    imgElement.onerror = () => {
+      // if 1.jpg fails, show a friendly placeholder but keep text
+      imgElement.style.display = 'none'; // hide broken icon
+      // we could add a background color but keep text, it's fine.
+      // Alternatively replace src with a data uri? not needed, just note.
+      console.warn("1.jpg not found – but 'It\\'s you!' still shows.");
+      // You could also set a fallback emoji or background, but text remains
+      const parentOverlay = document.getElementById('imageOverlay');
+      // ensure layout: if image hidden, the text stays centered.
+    };
+
+    function startFireworksAndReveal() {
+      if (fireworksActive) return;
+
+      overlay.style.display = 'none';
+      canvas.style.display = 'block';
+      resizeCanvas();
+
+      particles = [];
+      fireworksActive = true;
+      animateFireworks();
+
+      setTimeout(() => {
+        fireworksActive = false;
+        if (animationId) {
+          cancelAnimationFrame(animationId);
+          animationId = null;
+        }
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        canvas.style.display = 'none';
+
+        // show overlay with image and "It's you!"
+        overlay.style.display = 'flex';
+
+        // optionally force image reload if needed? but not necessary.
+        // if image previously error, it stays hidden; that's okay.
+      }, 5000);
+    }
+
+    button.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (overlay.style.display === 'flex') {
+        overlay.style.display = 'none';
+      }
+      if (fireworksActive) {
+        fireworksActive = false;
+        if (animationId) {
+          cancelAnimationFrame(animationId);
+          animationId = null;
+        }
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles = [];
+      }
+      startFireworksAndReveal();
+    });
+
+    window.addEventListener('resize', resizeCanvas);
+  })();
+</script>
+
+<!-- note: ensure 1.jpg is in same folder or update src -->
+</body>
+</html>
